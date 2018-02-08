@@ -1,0 +1,38 @@
+class spawner
+
+void  init(list<Players> players, mapLvl lvl)
+{
+each player
+     _entities .push  back new Human
+
+if lvl == easy
+   _enetities.push_back(monster)
+	
+}
+
+vois	update()
+{
+	if clock
+	   _entities.push_back(mob)
+}
+
+list<IEntity>	_entities;
+
+
+class system
+
+voit  init(int entityid)
+
+
+class MoveSystem
+
+main()
+{
+each spawner.getEntities
+     moveSystem.update(Ientity entity)
+     inputsystem.updat(Ientity entity)
+     spawner.update(Ientity entity)
+}
+
+
+thread en paralele qui ecoute en udp et qui push dans une liste

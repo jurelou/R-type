@@ -1,0 +1,362 @@
+
+
+
+
+
+
+Red Team                                                      L. Jurczyk
+Request for Comments: 4242                                    
+Category: Best Current Practice                               
+                                                            
+                                                            January 2018
+
+
+Copyright Notice
+
+    Copyright (C) DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE(2018).  
+						All Rights Reserved.
+
+Abstract
+
+   This document gives examples of the commands used in the nertwork 
+   Game Protocol for R-type
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Red Team r-type          Best Current Practice                  [Page 1]
+
+RFC 3665                        R-type                      January 2018
+
+
+Table of Contents
+
+   1.  Overview . . . . . . . . . . . . . . . . . . . . . . . . . . . 1
+   2.  Communication description. . . . . . . . . . . . . . . . . . . 2
+       2.1.  TCP. . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+       2.2.  UDP. . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+   3.  Common definitions       . . . . . . . . . . . . . . . . . . . 2
+       3.1.  Separators. . . . . . . . . . .  . . . . . . . . . . . . 2	
+       3.1.  Response. . . . . . . . . . . .  . . . . . . . . . . . . 2
+       3.2.  Player unique identifer. . . . . . . . . . . . . . . . . 2
+       3.3.  Games unique identifier. . . . . . . . . . . . . . . . . 2
+       3.4.  Games levels . . . . . . . . . . . . . . . . . . . . . . 3
+   4.  Authentication . . . . . . . . . . . . . . . . . . . . . . . . 3
+       4.1.  Login. . . . . . . . . . . . . . . . . . . . . . . . . . 3
+   5.  Lobby management . . . . . . . . . . . . . . . . . . . . . . . 3
+       5.1.  List games . . . . . . . . . . . . . . . . . . . . . . . 3
+       5.2.  Create game. . . . . . . . . . . . . . . . . . . . . . . 3
+       5.3.  Join game. . . . . . . . . . . . . . . . . . . . . . . . 4
+   6.  In game controls . . . . . . . . . . . . . . . . . . . . . . . 4
+       6.1.  Players movements. . . . . . . . . . . . . . . . . . . . 4
+       6.2.  New entity . . . . . . . . . . . . . . . . . . . . . . . 4
+       6.3.  Delete entity . .. . . . . . . . . . . . . . . . . . . . 4
+       6.4.  Entity movement .. . . . . . . . . . . . . . . . . . . . 4
+   7.  Security considerations. . . . . . . . . . . . . . . . . . . . 5
+   8.  Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . 5
+   8.  Full Copyright Statement . . . . . . . . . . . . . . . . . . . 5
+
+1.  Overview
+
+      This document provides a full documentation for the Network Game
+   Protocol of the R-Type Game.
+
+   It provides all the necessary information to understand how to
+   communicate with a R-Type server and with a R-Type client: commands,
+   protocols, packets serialization...
+
+ 
+
+
+
+Red Team r-type          Best Current Practice                  [Page 2]
+
+RFC 3665                        R-type                      January 2018
+
+ 
+2.  Communication description
+   The R-Type Network Communication is a text protocol.
+
+2.1 TCP
+   The TCP protocol is used for all the commands that are not related to
+   a game action.
+  
+   For example, login,lobby managment, creating game, ...	
+
+2.2 UDP
+   The UDP protocol is used for all the commands that are related to a
+   game action.
+   
+   For example, player inputs and entities movements.
+
+3.  Common definitions
+
+3.1  Separators
+  The protocol used is a text protocols which accepts ONLY ' ' or '\t'
+  as separators during the communication between the client and the
+  server.
+  
+  All other caracters used as separators may leed to an error.
+  
+3.2 Response
+  The server may respond to a request with a Response packet.
+  The Response packet takes as parameter a boolean status.
+
+  RESPONSE	=	"Type:RESPONSE;status:" SP status SP ";"
+  status	=	true | false
+
+  The server MAY respond to a client request with a RESPONSE packet.
+
+
+3.3 Player unique identifer
+  During the authentication session, the client MUST provides a unique
+  unique identifier.
+ 
+  This unique identifer will be user to identify the user in the
+  server client pool.
+  It MUST contains only alphanumeric values.
+  The maximum size of a string MUST be "2^8-1"
+ 
+3.3 Games unique identifer
+  The client MAY create a game during the lobby session, he MUST
+  provide a unique identifier for the game.
+ 
+  This unique identifer will be user to identify the game.
+  This unique identifier will be seen by all users in the games list
+  session.
+  It MUST contains only alphanumeric values.
+  The maximum size of a string MUST be "2^8-1"
+
+3.4 Game levels
+  The R-type game engines provides good features.
+  During the game creation session, the user MUST provide a level for his
+  game.
+  The game level is implemented as a value between 0 and 4.
+  The actual game levels supported in the R-type server are the following.
+    +--------+-----------+
+    | Value  | type      |
+    +--------+-----------+
+    | 1      | easy      |
+    | 2      | medium    |
+    | 3      | hard      |
+    | 4      | legendary |
+    +--------+-----------+
+
+
+Red Team r-type          Best Current Practice                  [Page 3]
+
+RFC 3665                        R-type                      January 2018
+
+4.  Authentication
+
+4.1.  Login
+  The client MUST ask the server with a LOGIN command when the instance
+  starts.
+  
+  The Login command takes as parameter a player unique identifier.
+  
+   LOGIN	=	"Type:LOGIN;id:" SP id SP ";"
+   id	        =	"[a-zA-Z0-9]"
+
+   Bob                        R-type Server
+     |                               |
+     |          LOGIN F1             |
+     |------------------------------>|
+     |       RESPONSE FALSE F2       |
+     |<------------------------------|
+     |          LOGIN F3             |
+     |------------------------------>|
+     |        RESPONSE TRUE F4       |
+     |<------------------------------|
+     |                               |
+  
+5.1 List games
+  During the lobby session, the client MAY ask the server for all
+  available games with the LISTGAME command.
+
+  The client MAY send the LISTGAME command.
+  
+   LISTGAME	=	"Type:LISTGAME;"
+
+  The server WILL respond with a LISTGAME command.
+   LISTGAME	   =	"Type:LISTGAME" SP [ game identifier ]
+   game identifier =	"[a-zA-Z0-9]"
+
+   Bob                        R-type Server
+     |                               |
+     |          LISTGAME F1          |
+     |------------------------------>|
+     |          LISTGAME F2          |
+     |<------------------------------|
+
+5.2 Create game
+  During the lobby session, the client MAY ask the server to create
+  a game.
+
+  The client MAY send the CREATEGAME command.
+  The CREATEGAME command takes as  parameter the unique identifier given
+  by the client, and the level of the game.
+  
+   CREATEGAME	   =	"Type:CREATEGAME;id:" SP game identifier SP ";lvl:" SP level SP
+   game identifier =    "[a-zA-Z0-9]"
+   level           =    "{1,3}"      
+
+
+   Bob                        R-type Server
+     |                               |
+     |        CREATEGAME F1          |
+     |------------------------------>|
+     |       RESPONSE false F2       |
+     |<------------------------------|
+     |        CREATEGAME F3          |	
+     |------------------------------>|
+     |       RESPONSE true F2        |
+     |<------------------------------|
+
+  The server WILL respond with a RESPONSE command.
+
+Red Team r-type          Best Current Practice                  [Page 4]
+
+RFC 3665                        R-type                      January 2018
+
+
+5.3 Join game
+  During the lobby session, the client MAY ask the server to join an 
+  exiting game.
+
+  The client MAY send the JOINGAME command.
+  The JOINGAME command takes as  parameter the unique identifier given of the
+  game.
+  
+   JOINGAME	   =	"Type:JOINGAME;id:" SP game identifier SP
+   game identifier =    "[a-zA-Z0-9]"
+
+
+   Bob                        R-type Server
+     |                               |
+     |        JOINGAME F1            |
+     |------------------------------>|
+     |       RESPONSE false F2       |
+     |<------------------------------|
+     |        JOINGAME F3            |	
+     |------------------------------>|
+     |       RESPONSE true F2        |
+     |<------------------------------|
+
+  The server WILL respond with a RESPONSE command.
+
+6. In game controls
+
+6.1 Players movements
+  The actual engine permitts the user to use the keybords inputs to
+  control his ship.
+  
+  The MOVE command MUST be send over UDP sockets.
+
+  The client may use arrow keys and space bar to control his ship.
+  The client MUST send a MOVE command if one of those keys is pressed.
+
+   MOVE	   =	"Type:MOVE;input:" SP input identifier SP
+   input identifier =    "{1,5}"
+
+
+    +--------+-----------+
+    | Value  | type      |
+    +--------+-----------+
+    | 1      | up        |
+    | 2      | down      |
+    | 3      | left      |
+    | 4      | right     |
+    | 5      | shoot     |
+    +--------+-----------+
+
+6.1 New entity
+  The server MUST send a NEWENTITY command to the client when a
+  entity has been created.
+  
+  The NEWENTITY command MUST be send over UDP sockets.
+
+   NEWENTITY	     	=    "Type:NEWENTITY;id:" SP identifier SP
+			     ";pos:" SP coordinates X SP
+   unique identifier    =    "[a-zA-Z0-9]"
+   coordinates		=    float value ";" float value
+   float value          =    "[0-9]"
+
+6.2 Delete entity
+  The server MUST send a DELETEENTITY command to the client when a
+  entity died.
+  
+  The DELETEENTITY command MUST be send over UDP sockets.
+
+   DELETEENTITY	     	=    "Type:DELETEENTITY;id:" SP identifier SP
+   unique identifier    =    "[a-zA-Z0-9]"
+
+6.3 Entities movements
+  The server WILL send a ENTITYMOVE command if an entity position
+  changed.
+  
+  The ENTITYMOVE command WILL be send over UDP sockets.
+
+   ENTITYMOVE   	=     "Type:ENTITYMOVE;id:" SP unique identifier SP 
+ 			      ";pos:" SP coordinates SP
+
+   unique identifier    =    "[a-zA-Z0-9]"
+   coordinates		=    float value ";" float value
+   float value          =    "[0-9]"
+
+
+Red Team r-type          Best Current Practice                  [Page 5]
+
+RFC 3665                        R-type                      January 2018
+
+7.  Security Considerations
+
+  this server is absolutely not secure.
+  No connection is secure, which can lead to serious 
+  consequences (registration hijacking, server impersonation, message body
+  tampering, session modifying or teardown,denial of service, amplification 
+  attacks).
+
+8.  Authors' Addresses
+
+   All listed authors actively contributed large amounts of text to this
+   document.
+
+   Louis Jurczyk
+   MCI
+   42 rue saint amand
+   Lille
+   FR
+
+   EMail: louis.jurczyk@epitech.eu
+
+
+9.  Full Copyright Statement
+
+           DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+                   Version 2, December 2004
+ 
+Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
+ 
+Everyone is permitted to copy and distribute verbatim or modified
+copies of this license document, and changing it is allowed as long
+as the name is changed.
+ 
+           DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+  TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+ 
+ 0. You just DO WHAT THE FUCK YOU WANT TO.
